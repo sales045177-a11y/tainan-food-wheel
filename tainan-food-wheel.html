@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="台南美食抽籤轉盤，30 間餐廳隨機選。">
+  <title>府城吃什麼？｜台南美食抽籤轉盤</title>
+  <style>
+    :root { --ink:#203d3c; --paper:#fff8e9; --red:#bd4f36; --red-dark:#963821; --gold:#e5ae45; --aqua:#b9dfd6; }
+    * { box-sizing:border-box; }
+    body { min-height:100vh; margin:0; color:var(--ink); font-family:"Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif; background:linear-gradient(135deg,#f8e7bf 0%,#fff9ec 48%,#d8eee8 100%); }
+    body::before { content:""; position:fixed; inset:0; pointer-events:none; opacity:.34; background-image:radial-gradient(#bd4f36 1px,transparent 1.5px); background-size:21px 21px; mask-image:linear-gradient(120deg,black,transparent 68%); }
+    main { position:relative; width:min(1120px,calc(100% - 32px)); margin:auto; padding:42px 0 56px; }
+    header { text-align:center; margin-bottom:28px; }
+    .eyebrow { margin:0 0 9px; color:var(--red); font-weight:800; letter-spacing:.16em; font-size:.8rem; }
+    h1 { margin:0; font-family:Georgia,"Noto Serif TC",serif; font-size:clamp(2.25rem,6vw,4.35rem); letter-spacing:.04em; color:var(--red-dark); line-height:1.05; }
+    .subtitle { margin:13px auto 0; max-width:550px; line-height:1.7; color:#496361; }
+    .panel { display:grid; grid-template-columns:minmax(0,1.25fr) minmax(290px,.75fr); gap:34px; align-items:center; padding:clamp(20px,4vw,42px); border:2px solid rgba(32,61,60,.13); border-radius:32px; background:rgba(255,253,245,.83); box-shadow:0 20px 70px rgba(92,67,29,.16); backdrop-filter:blur(6px); }
+    .wheel-side { display:grid; place-items:center; }
+    .wheel-wrap { position:relative; width:min(100%,580px); aspect-ratio:1; filter:drop-shadow(0 14px 10px rgba(33,62,61,.17)); }
+    canvas { width:100%; height:100%; display:block; }
+    .pointer { position:absolute; top:-6px; left:50%; transform:translateX(-50%); width:0; height:0; z-index:2; border-left:23px solid transparent; border-right:23px solid transparent; border-top:49px solid var(--red-dark); filter:drop-shadow(0 3px 0 #fff4df); }
+    .hub { position:absolute; inset:50% auto auto 50%; transform:translate(-50%,-50%); width:19%; aspect-ratio:1; display:grid; place-items:center; border:7px solid #fff6de; border-radius:50%; color:#fff; background:var(--red); box-shadow:0 2px 0 var(--red-dark),0 4px 14px rgba(73,28,19,.25); font-size:clamp(1rem,2.4vw,1.45rem); font-weight:900; letter-spacing:.05em; }
+    .copy { text-align:center; }
+    .copy h2 { margin:0 0 11px; font-family:Georgia,"Noto Serif TC",serif; font-size:clamp(1.5rem,3vw,2.1rem); color:var(--red-dark); }
+    .copy p { margin:0 auto 22px; max-width:360px; line-height:1.75; color:#56706c; }
+    button { appearance:none; cursor:pointer; border:0; border-radius:999px; padding:19px 38px; color:white; background:var(--red); box-shadow:0 5px 0 var(--red-dark),0 11px 22px rgba(153,56,33,.24); font:800 clamp(1.2rem,2.4vw,1.42rem) inherit; letter-spacing:.06em; transition:transform .18s,box-shadow .18s,background .18s; }
+    button:hover:not(:disabled) { background:#ce5b3d; transform:translateY(-2px); box-shadow:0 7px 0 var(--red-dark),0 14px 25px rgba(153,56,33,.25); }
+    button:active:not(:disabled) { transform:translateY(4px); box-shadow:0 1px 0 var(--red-dark); }
+    button:disabled { cursor:wait; opacity:.75; }
+    .result { min-height:118px; margin-top:30px; padding:19px 15px; border:1px dashed rgba(32,61,60,.35); border-radius:17px; background:#fff9e8; }
+    .result-label { display:block; margin-bottom:5px; color:var(--red); font-size:.78rem; font-weight:900; letter-spacing:.13em; }
+    #resultName { display:block; font-family:Georgia,"Noto Serif TC",serif; font-size:clamp(1.34rem,3vw,1.85rem); font-weight:900; color:var(--ink); }
+    #resultDish { display:block; margin-top:6px; color:#64807a; font-size:.92rem; }
+    #resultAddress { display:block; margin-top:5px; color:#496361; font-size:.82rem; line-height:1.45; }
+    .hint { margin-top:18px!important; font-size:.82rem; color:#718884!important; }
+    .choices { margin-top:31px; padding:26px; border-radius:24px; background:rgba(32,61,60,.94); color:#fbf3df; }
+    .choices h2 { margin:0; text-align:center; font-family:Georgia,"Noto Serif TC",serif; letter-spacing:.08em; font-size:1.35rem; }
+    ol { display:grid; grid-template-columns:repeat(3,1fr); gap:8px 24px; margin:20px 0 0; padding-left:1.5rem; }
+    li { padding:4px 0; font-size:.9rem; color:#f8ead0; }
+    li::marker { color:var(--gold); font-weight:800; }
+    footer { margin-top:18px; text-align:center; color:#627976; font-size:.78rem; line-height:1.6; }
+    @media (max-width:760px) { main{padding-top:30px}.panel{grid-template-columns:1fr;gap:22px;padding:24px 18px 28px}.wheel-wrap{width:min(100%,500px)}.copy{display:grid;place-items:center}.result{width:min(100%,390px)}ol{grid-template-columns:repeat(2,1fr);gap:7px 15px}.choices{padding:22px 20px} }
+    @media (max-width:430px) { ol{grid-template-columns:1fr} h1{font-size:2.35rem}.pointer{border-left-width:18px;border-right-width:18px;border-top-width:39px}.hub{border-width:5px} }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">TAINAN FOOD LOTTERY · 30 PICKS</p>
+      <h1>府城吃什麼？</h1>
+      <p class="subtitle">今天的胃，就交給轉盤決定。收錄 30 間台南美食店家，從早粥到晚餐都有好理由出發。</p>
+    </header>
+    <section class="panel" aria-label="台南美食抽籤轉盤">
+      <div class="wheel-side">
+        <div class="wheel-wrap">
+          <i class="pointer" aria-hidden="true"></i>
+          <canvas id="wheel" width="900" height="900" aria-label="美食抽籤轉盤"></canvas>
+          <div class="hub" aria-hidden="true">吃</div>
+        </div>
+      </div>
+      <div class="copy">
+        <h2>讓美食自己選你</h2>
+        <p>按下按鈕，轉盤會帶你前往一間值得吃的台南好味。抽到了就出發吧！</p>
+        <button id="spinButton" type="button">今天吃甚麼?</button>
+        <div class="result" aria-live="polite">
+          <span class="result-label">今日尚未揭曉</span>
+          <strong id="resultName">按下按鈕開始</strong>
+          <span id="resultDish">你的下一餐，正在等你。</span>
+          <span id="resultAddress">抽中後會顯示店家地址。</span>
+        </div>
+        <p class="hint">轉盤將隨機選出 1 間店家</p>
+      </div>
+    </section>
+    <section class="choices" aria-labelledby="choice-title">
+      <h2 id="choice-title">本次轉盤選項</h2>
+      <ol id="choiceList"></ol>
+    </section>
+    <footer>店家名單採 2026 年台南必比登推介 30 家店家製作；出發前建議再確認各店營業時間與公休日。</footer>
+  </main>
+  <script>
+    const foods = [
+      ['阿星鹹粥','鹹粥','台南市中西區民族路三段 289 號'],['阿文米粿','米粿','台南市中西區保安路 74 號'],['阿興虱目魚','虱目魚料理','台南市北區文賢路 311 號'],['阿美飯店','台灣料理','台南市中西區民權路二段 98 號'],['咩灣裡羊肉店','羊肉料理','台南市南區興南街 36 號'],['詹記','家常鮮魚料理','台南市東區東安路 59 號'],['田媽媽 長盈海味屋','海味小吃','台南市北門區三寮灣慈安里 484 號'],['誠實鍋燒意麵','鍋燒意麵','台南市中西區西門路一段 702 巷 12 號'],['大勇街無名鹹粥','鹹粥','台南市中西區大勇街 85 號'],['添厚','台灣料理','台南市中西區新美街 125 巷 3 號'],
+      ['福泰飯桌第三代','飯桌仔小吃','台南市中西區民族路二段 219 號'],['好農家米糕','米糕','台南市南區健康路二段 66 號'],['西羅殿牛肉湯','牛肉湯','台南市北區公園南路 98 號'],['黃家蝦捲','蝦捲','台南市中西區西和路 268 號'],['吃麵吧','麵食','台南市中西區保安路 159 之 1 號'],['開元紅燒土魠魚羹','土魠魚羹','台南市北區開元路 307 號'],['蓮霧腳羊肉湯','羊肉湯','台南市新化區中正路 361 號'],['落成米糕','米糕','台南市中西區民族路二段 241 號'],['無名羊肉湯','羊肉湯','台南市中西區府前路二段 144 號'],['博仁堂','台灣料理','台南市中西區西門路二段 300 巷 27 號'],
+      ['三好一公道當歸鴨','當歸鴨','台南市中西區府前路一段 2 號'],['尚好吃牛肉湯','牛肉湯','台南市北區北安路一段 6 號'],['鮮蒸蝦仁肉圓','蝦仁肉圓','台南市東區裕農路 609 號'],['小公園擔仔麵','擔仔麵','台南市中西區西門路二段 321 號'],['謝掌櫃','海鮮粥','台南市安平區運河路 23 巷 5 號'],['葉家小卷米粉','小卷米粉','台南市中西區國華街二段 142 號'],['葉桑生炒鴨肉焿','生炒鴨肉羹','台南市東區林森路二段 216 號'],['一味品','小吃','台南市中西區國華街三段 177 號'],['八寶彬圓仔惠（國華街）','八寶冰','台南市中西區國華街二段 99 號'],['竹記冬菜鴨','冬菜鴨','台南市中西區中山路 47 號']
+    ];
+    const canvas = document.querySelector('#wheel');
+    const ctx = canvas.getContext('2d');
+    const button = document.querySelector('#spinButton');
+    const nameEl = document.querySelector('#resultName');
+    const dishEl = document.querySelector('#resultDish');
+    const addressEl = document.querySelector('#resultAddress');
+    const labelEl = document.querySelector('.result-label');
+    const listEl = document.querySelector('#choiceList');
+    const colors = ['#d8593a','#e7b64e','#2f766f','#f18b5c','#4d9189','#e6c766'];
+    const count = foods.length, arc = Math.PI * 2 / count;
+    let rotation = 0, spinning = false;
+
+    foods.forEach(([name, dish, address]) => { const item = document.createElement('li'); item.textContent = `${name}｜${dish}｜${address}`; listEl.append(item); });
+    function draw(angle = rotation) {
+      const size = canvas.width, c = size / 2, radius = c - 21;
+      ctx.clearRect(0,0,size,size);
+      ctx.save(); ctx.translate(c,c); ctx.rotate(angle);
+      for (let i=0;i<count;i++) {
+        const start = -Math.PI/2 + i*arc;
+        ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,radius,start,start+arc); ctx.closePath();
+        ctx.fillStyle = colors[i % colors.length]; ctx.fill();
+        ctx.strokeStyle = 'rgba(255,248,233,.8)'; ctx.lineWidth = 3; ctx.stroke();
+        ctx.save(); ctx.rotate(start + arc/2); ctx.textAlign = 'right'; ctx.fillStyle = '#fffaf0';
+        ctx.font = '800 21px "Microsoft JhengHei", sans-serif';
+        const text = foods[i][0].replace('（國華街）','');
+        const max = 120;
+        const clipped = ctx.measureText(text).width > max ? text.slice(0,6) + '…' : text;
+        ctx.fillText(clipped, radius - 20, 7); ctx.restore();
+      }
+      ctx.beginPath(); ctx.arc(0,0,radius+5,0,Math.PI*2); ctx.strokeStyle='#203d3c'; ctx.lineWidth=10; ctx.stroke();
+      ctx.restore();
+    }
+    function easeOut(t) { return 1 - Math.pow(1-t, 4); }
+    function spin() {
+      if (spinning) return; spinning = true; button.disabled = true; button.textContent = '轉盤轉動中…';
+      labelEl.textContent = '正在尋找今日好味'; nameEl.textContent = '轉呀轉呀'; dishEl.textContent = '請稍候，命運正在挑選。'; addressEl.textContent = '';
+      const chosen = Math.floor(Math.random()*count);
+      // Each sector is drawn with its first edge at the top; rotate its centre under the top pointer.
+      const targetCenter = -(chosen + .5) * arc;
+      const normalizedCurrent = ((rotation % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
+      const normalizedTarget = ((targetCenter % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
+      const delta = ((normalizedTarget - normalizedCurrent + Math.PI*2) % (Math.PI*2)) + Math.PI*2*7;
+      const start = rotation, end = rotation + delta, duration = 3800, began = performance.now();
+      function animate(now) { const t=Math.min((now-began)/duration,1); rotation=start+(end-start)*easeOut(t); draw(); if(t<1) requestAnimationFrame(animate); else { rotation=end; spinning=false; button.disabled=false; button.textContent='再抽一次 ✦'; labelEl.textContent='今天就吃這間'; nameEl.textContent=foods[chosen][0]; dishEl.textContent=`推薦品項：${foods[chosen][1]}`; addressEl.textContent=`地址：${foods[chosen][2]}`; } }
+      requestAnimationFrame(animate);
+    }
+    button.addEventListener('click',spin); draw();
+  </script>
+</body>
+</html>
