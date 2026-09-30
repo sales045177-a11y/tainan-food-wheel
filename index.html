@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="福樺實業附近午餐抽籤轉盤，30 間仁德／東區餐廳隨機選。">
+  <title>府城吃什麼？｜福樺午餐抽籤轉盤</title>
+  <style>
+    :root { --ink:#203d3c; --paper:#fff8e9; --red:#bd4f36; --red-dark:#963821; --gold:#e5ae45; --aqua:#b9dfd6; }
+    * { box-sizing:border-box; }
+    body { min-height:100vh; margin:0; color:var(--ink); font-family:"Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif; background:linear-gradient(135deg,#f8e7bf 0%,#fff9ec 48%,#d8eee8 100%); }
+    body::before { content:""; position:fixed; inset:0; pointer-events:none; opacity:.34; background-image:radial-gradient(#bd4f36 1px,transparent 1.5px); background-size:21px 21px; mask-image:linear-gradient(120deg,black,transparent 68%); }
+    main { position:relative; width:min(1120px,calc(100% - 32px)); margin:auto; padding:42px 0 56px; }
+    header { text-align:center; margin-bottom:28px; }
+    .eyebrow { margin:0 0 9px; color:var(--red); font-weight:800; letter-spacing:.16em; font-size:.8rem; }
+    h1 { margin:0; font-family:Georgia,"Noto Serif TC",serif; font-size:clamp(2.25rem,6vw,4.35rem); letter-spacing:.04em; color:var(--red-dark); line-height:1.05; }
+    .subtitle { margin:13px auto 0; max-width:620px; line-height:1.7; color:#496361; }
+    .panel { display:grid; grid-template-columns:minmax(0,1.25fr) minmax(290px,.75fr); gap:34px; align-items:center; padding:clamp(20px,4vw,42px); border:2px solid rgba(32,61,60,.13); border-radius:32px; background:rgba(255,253,245,.83); box-shadow:0 20px 70px rgba(92,67,29,.16); backdrop-filter:blur(6px); }
+    .wheel-side { display:grid; place-items:center; }
+    .wheel-wrap { position:relative; width:min(100%,580px); aspect-ratio:1; filter:drop-shadow(0 14px 10px rgba(33,62,61,.17)); }
+    canvas { width:100%; height:100%; display:block; }
+    .pointer { position:absolute; top:-6px; left:50%; transform:translateX(-50%); width:0; height:0; z-index:2; border-left:23px solid transparent; border-right:23px solid transparent; border-top:49px solid var(--red-dark); filter:drop-shadow(0 3px 0 #fff4df); }
+    .hub { position:absolute; inset:50% auto auto 50%; transform:translate(-50%,-50%); width:19%; aspect-ratio:1; display:grid; place-items:center; border:7px solid #fff6de; border-radius:50%; color:#fff; background:var(--red); box-shadow:0 2px 0 var(--red-dark),0 4px 14px rgba(73,28,19,.25); font-size:clamp(1rem,2.4vw,1.45rem); font-weight:900; letter-spacing:.05em; }
+    .copy { text-align:center; }
+    .copy h2 { margin:0 0 11px; font-family:Georgia,"Noto Serif TC",serif; font-size:clamp(1.5rem,3vw,2.1rem); color:var(--red-dark); }
+    .copy p { margin:0 auto 22px; max-width:360px; line-height:1.75; color:#56706c; }
+    button { appearance:none; cursor:pointer; border:0; border-radius:999px; padding:15px 28px; color:white; background:var(--red); box-shadow:0 5px 0 var(--red-dark),0 11px 22px rgba(153,56,33,.24); font:800 1.05rem inherit; letter-spacing:.05em; transition:transform .18s,box-shadow .18s,background .18s; }
+    button:hover:not(:disabled) { background:#ce5b3d; transform:translateY(-2px); box-shadow:0 7px 0 var(--red-dark),0 14px 25px rgba(153,56,33,.25); }
+    button:active:not(:disabled) { transform:translateY(4px); box-shadow:0 1px 0 var(--red-dark); }
+    button:disabled { cursor:not-allowed; opacity:.55; }
+    .filters { margin:0 auto 20px; max-width:390px; padding:14px 15px 13px; border:1px solid rgba(32,61,60,.17); border-radius:16px; background:rgba(255,249,232,.78); text-align:left; }
+    .filter-row { display:flex; align-items:center; flex-wrap:wrap; gap:9px 12px; }
+    .filter-row + .filter-row { margin-top:10px; padding-top:10px; border-top:1px dashed rgba(32,61,60,.22); }
+    .filter-title { flex:0 0 100%; color:#496361; font-size:.78rem; font-weight:900; letter-spacing:.05em; }
+    .check-pill { display:inline-flex; align-items:center; gap:6px; cursor:pointer; color:#365653; font-size:.82rem; font-weight:700; user-select:none; }
+    .check-pill input { accent-color:var(--red); width:16px; height:16px; margin:0; }
+    .filter-note { display:block; margin-top:8px; color:#718884; font-size:.72rem; line-height:1.45; }
+    .result { min-height:118px; margin-top:30px; padding:19px 15px; border:1px dashed rgba(32,61,60,.35); border-radius:17px; background:#fff9e8; }
+    .result-label { display:block; margin-bottom:5px; color:var(--red); font-size:.78rem; font-weight:900; letter-spacing:.13em; }
+    #resultName { display:block; font-family:Georgia,"Noto Serif TC",serif; font-size:clamp(1.34rem,3vw,1.85rem); font-weight:900; color:var(--ink); }
+    #resultDish { display:block; margin-top:6px; color:#64807a; font-size:.92rem; }
+    #resultAddress { display:block; margin-top:5px; color:#496361; font-size:.82rem; line-height:1.45; }
+    #resultAddress a, .choices a { color:inherit; text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:3px; }
+    #resultAddress a:hover, .choices a:hover { color:#f3c968; }
+    #resultAddress a:hover { color:var(--red); }
+    .hint { margin-top:18px!important; font-size:.82rem; color:#718884!important; }
+    .choices { margin-top:31px; padding:26px; border-radius:24px; background:rgba(32,61,60,.94); color:#fbf3df; }
+    .choices h2 { margin:0; text-align:center; font-family:Georgia,"Noto Serif TC",serif; letter-spacing:.08em; font-size:1.35rem; }
+    ol { display:grid; grid-template-columns:repeat(3,1fr); gap:8px 24px; margin:20px 0 0; padding-left:1.5rem; }
+    li { padding:4px 0; font-size:.9rem; color:#f8ead0; }
+    li::marker { color:var(--gold); font-weight:800; }
+    footer { margin-top:18px; text-align:center; color:#627976; font-size:.78rem; line-height:1.6; }
+    @media (max-width:760px) { main{padding-top:30px}.panel{grid-template-columns:1fr;gap:22px;padding:24px 18px 28px}.wheel-wrap{width:min(100%,500px)}.copy{display:grid;place-items:center}.filters{width:min(100%,390px)}.result{width:min(100%,390px)}ol{grid-template-columns:repeat(2,1fr);gap:7px 15px}.choices{padding:22px 20px} }
+    @media (max-width:430px) { ol{grid-template-columns:1fr} h1{font-size:2.35rem}.pointer{border-left-width:18px;border-right-width:18px;border-top-width:39px}.hub{border-width:5px} }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">FUKA LUNCH LOTTERY · 30 PICKS</p>
+      <h1>府城吃什麼？</h1>
+      <p class="subtitle">以福樺實業有限公司為中心，收錄仁德區與東區 30 間午餐候選；可依今日營業日與餐點類型再縮小範圍。</p>
+    </header>
+    <section class="panel" aria-label="福樺午餐抽籤轉盤">
+      <div class="wheel-side">
+        <div class="wheel-wrap">
+          <i class="pointer" aria-hidden="true"></i>
+          <canvas id="wheel" width="900" height="900" aria-label="午餐抽籤轉盤"></canvas>
+          <div class="hub" aria-hidden="true">吃</div>
+        </div>
+      </div>
+      <div class="copy">
+        <h2>讓午餐自己選你</h2>
+        <p>先選條件，再按下按鈕；轉盤只會從符合條件的店家中抽出一間。</p>
+        <div class="filters" aria-label="午餐篩選條件">
+          <div class="filter-row">
+            <label class="check-pill"><input id="todayOnly" type="checkbox" checked> 今天有營業才會被抽中</label>
+          </div>
+          <div class="filter-row" id="categoryFilters">
+            <span class="filter-title">餐點類型</span>
+            <label class="check-pill"><input type="checkbox" value="麵" checked> 麵</label>
+            <label class="check-pill"><input type="checkbox" value="飯" checked> 飯</label>
+            <label class="check-pill"><input type="checkbox" value="便當" checked> 便當</label>
+            <label class="check-pill"><input type="checkbox" value="其他" checked> 其他</label>
+          </div>
+          <small class="filter-note">「今天有營業」依台灣星期與午餐固定營業日判斷；營業日資料不明者會暫時排除。</small>
+        </div>
+        <button id="spinButton" type="button">今天吃甚麼?</button>
+        <div class="result" aria-live="polite">
+          <span class="result-label">今日尚未揭曉</span>
+          <strong id="resultName">按下按鈕開始</strong>
+          <span id="resultDish">你的下一餐，正在等你。</span>
+          <span id="resultAddress">抽中後會顯示店家地址。</span>
+        </div>
+        <p class="hint" id="eligibleHint">轉盤將隨機選出 1 間店家</p>
+      </div>
+    </section>
+    <section class="choices" aria-labelledby="choice-title">
+      <h2 id="choice-title">本次轉盤選項</h2>
+      <ol id="choiceList"></ol>
+    </section>
+    <footer>店家名單以福樺實業附近仁德／東區午餐候選整理；營業時間可能臨時調整，出發前仍建議點地址前往 Google 地圖確認。</footer>
+  </main>
+  <script>
+    // days 使用 JavaScript 星期編號：0=週日、1=週一 ... 6=週六。
+    // days:null 代表目前沒有足夠可靠的固定營業日資料；啟用「今天有營業」時暫不抽取。
+    const foods = [
+      {name:'張家水餃店', dish:'水餃、牛肉麵', address:'台南市仁德區仁義路23號', category:'麵', days:[0,1,2,3,4,5]},
+      {name:'安仔麵店', dish:'麵食、台式小吃', address:'台南市仁德區仁義一街140號', category:'麵', days:[1,2,3,4,5]},
+      {name:'滷動您的味', dish:'滷味飯、水餃', address:'台南市仁德區正義路104號', category:'飯', days:[1,2,3,4,5,6]},
+      {name:'仁德自助餐', dish:'自助餐', address:'台南市仁德區中山路545號', category:'飯', days:[0,1,2,3,4,5,6]},
+      {name:'粲米麵食館', dish:'麵食', address:'台南市仁德區中山路197號', category:'麵', days:[0,2,3,4,5,6]},
+      {name:'圓便當910方餐盒', dish:'方餐盒、便當', address:'台南市仁德區中正路二段910號', category:'便當', days:[1,2,3,4,5]},
+      {name:'香港陳記燒臘快餐', dish:'燒臘便當', address:'台南市仁德區中山路166號', category:'便當', days:[1,2,3,4,5]},
+      {name:'德利廚房', dish:'自助餐', address:'台南市仁德區中正路三段70號', category:'飯', days:[0,1,2,3,4,5,6]},
+      {name:'天青好食光 弁當專賣', dish:'弁當、餐盒', address:'台南市仁德區民安路一段406號', category:'便當', days:[1,2,3,4,5,6]},
+      {name:'忠味麵館', dish:'榨菜肉絲麵', address:'台南市仁德區仁義一街55號', category:'麵', days:[2,3,4,5,6]},
+      {name:'128餐館', dish:'家常料理', address:'台南市仁德區文善街128號', category:'其他', days:[0,3,4,5,6]},
+      {name:'饕客鮮魚海產', dish:'鮮魚、家常熱炒', address:'台南市仁德區正義二街57號', category:'其他', days:[0,1,2,3,4,5,6]},
+      {name:'莎麗家庭餐廳 Sally Garden Home Kitchen', dish:'泰式家常料理', address:'台南市仁德區文華路三段189巷92弄75號', category:'其他', days:[0,1,2,3,4,5,6]},
+      {name:'1107巷', dish:'家常料理', address:'台南市仁德區文華路二段1107巷88號', category:'其他', days:[0,3,4,5,6]},
+      {name:'糧戶食堂－虎山店', dish:'中式餐點、麵食', address:'台南市仁德區文華路二段316巷11號', category:'飯', days:[0,3,4,5,6]},
+      {name:'東大麵館', dish:'麵食', address:'台南市東區崇善路683號', category:'麵', days:[1,2,3,4,5,6]},
+      {name:'台南正 虱目魚專賣', dish:'虱目魚、魚肚飯', address:'台南市東區崇德路648號', category:'飯', days:[0,2,3,4,5,6]},
+      {name:'魯肉昌', dish:'魯肉飯、台式料理', address:'台南市東區崇德路451號', category:'飯', days:[0,1,2,3,4,5,6]},
+      {name:'崇明路無名麵店', dish:'麵食、小菜', address:'台南市東區崇明路482號', category:'麵', days:[1,2,3,4,5,6]},
+      {name:'米寶便當 台南崇德門市', dish:'池上便當', address:'台南市東區崇德路471-2號', category:'便當', days:[0,1,2,3,4,5,6]},
+      {name:'崇善自助餐', dish:'自助餐', address:'台南市東區崇善路859號', category:'飯', days:null},
+      {name:'洪城牛肉麵崇善店', dish:'牛肉麵、熱炒', address:'台南市東區崇善路366號', category:'麵', days:[0,1,2,3,4,5,6]},
+      {name:'班恩便當 崇德店', dish:'便當、餐盒', address:'台南市東區崇德路412號', category:'便當', days:[0,1,2,3,4,5,6]},
+      {name:'小南老蘇排骨便當 崇德店', dish:'排骨便當', address:'台南市東區崇德路669號', category:'便當', days:[0,1,2,3,4,5]},
+      {name:'孫家麵工坊', dish:'麵食', address:'台南市東區崇德路293號', category:'麵', days:[0,1,2,3,4,5,6]},
+      {name:'Mr拉麵 野崎家', dish:'拉麵、咖哩', address:'台南市東區崇德路567號', category:'麵', days:[0,1,2,3,4,5,6]},
+      {name:'真好便當', dish:'便當', address:'台南市東區仁和路111巷4號', category:'便當', days:[1,2,3,4,5]},
+      {name:'嘉昌土雞肉飯舖 崇德店', dish:'土雞肉飯', address:'台南市東區崇德路263號', category:'飯', days:[0,1,2,3,4,5,6]},
+      {name:'小金麵店 崇德店', dish:'乾麵、湯麵、小菜', address:'台南市東區崇德路489號', category:'麵', days:[1,2,3,4,5,6]},
+      {name:'崇德陽春麵', dish:'陽春麵、滷味', address:'台南市東區崇德路566-580號', category:'麵', days:[0,2,3,4,5,6]}
+    ];
+
+    const canvas = document.querySelector('#wheel');
+    const ctx = canvas.getContext('2d');
+    const button = document.querySelector('#spinButton');
+    const nameEl = document.querySelector('#resultName');
+    const dishEl = document.querySelector('#resultDish');
+    const addressEl = document.querySelector('#resultAddress');
+    const labelEl = document.querySelector('.result-label');
+    const listEl = document.querySelector('#choiceList');
+    const hintEl = document.querySelector('#eligibleHint');
+    const todayOnlyEl = document.querySelector('#todayOnly');
+    const categoryInputs = [...document.querySelectorAll('#categoryFilters input[type="checkbox"]')];
+    const filterInputs = [todayOnlyEl, ...categoryInputs];
+    const colors = ['#d8593a','#e7b64e','#2f766f','#f18b5c','#4d9189','#e6c766'];
+    let eligibleFoods = [];
+    let rotation = 0;
+    let spinning = false;
+
+    function googleMapsUrl(food) {
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${food.name} ${food.address}`)}`;
+    }
+
+    function taipeiDayIndex() {
+      const day = new Intl.DateTimeFormat('en-US', { weekday:'short', timeZone:'Asia/Taipei' }).format(new Date());
+      return {Sun:0, Mon:1, Tue:2, Wed:3, Thu:4, Fri:5, Sat:6}[day];
+    }
+
+    function selectedCategories() {
+      return new Set(categoryInputs.filter(input => input.checked).map(input => input.value));
+    }
+
+    function renderChoiceList() {
+      listEl.innerHTML = '';
+      foods.forEach(food => {
+        const item = document.createElement('li');
+        item.append(document.createTextNode(`${food.name}｜${food.dish}｜`));
+        const link = document.createElement('a');
+        link.href = googleMapsUrl(food);
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = food.address;
+        link.title = `在 Google 地圖開啟 ${food.name}`;
+        item.append(link);
+        listEl.append(item);
+      });
+    }
+
+    function updateEligibleFoods(resetResult = true) {
+      const categories = selectedCategories();
+      const today = taipeiDayIndex();
+      eligibleFoods = foods.filter(food => {
+        if (!categories.has(food.category)) return false;
+        if (!todayOnlyEl.checked) return true;
+        return Array.isArray(food.days) && food.days.includes(today);
+      });
+
+      rotation = 0;
+      draw();
+      const unknownCount = foods.filter(food => food.days === null).length;
+      hintEl.textContent = eligibleFoods.length
+        ? `目前有 ${eligibleFoods.length} 間符合條件，轉盤將隨機選出 1 間${todayOnlyEl.checked && unknownCount ? '（營業日未確認者暫不列入）' : ''}`
+        : '目前沒有符合條件的店家，請調整篩選條件。';
+      button.disabled = eligibleFoods.length === 0;
+      button.textContent = eligibleFoods.length ? '今天吃甚麼?' : '沒有符合條件的店家';
+
+      if (resetResult) {
+        labelEl.textContent = eligibleFoods.length ? '篩選條件已更新' : '沒有可抽選的店家';
+        nameEl.textContent = eligibleFoods.length ? '按下按鈕開始' : '請調整篩選條件';
+        dishEl.textContent = eligibleFoods.length ? '你的下一餐，正在等你。' : '至少勾選一種餐點類型，或取消「今天有營業」限制。';
+        addressEl.textContent = eligibleFoods.length ? '抽中後會顯示店家地址。' : '';
+      }
+    }
+
+    function draw(angle = rotation) {
+      const size = canvas.width, c = size / 2, radius = c - 21;
+      ctx.clearRect(0,0,size,size);
+      ctx.save();
+      ctx.translate(c,c);
+
+      if (!eligibleFoods.length) {
+        ctx.beginPath();
+        ctx.arc(0,0,radius,0,Math.PI*2);
+        ctx.fillStyle = '#d7dfd9';
+        ctx.fill();
+        ctx.strokeStyle = '#203d3c';
+        ctx.lineWidth = 10;
+        ctx.stroke();
+        ctx.fillStyle = '#496361';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = '800 34px "Microsoft JhengHei", sans-serif';
+        ctx.fillText('請調整篩選條件', 0, 0);
+        ctx.restore();
+        return;
+      }
+
+      const count = eligibleFoods.length;
+      const arc = Math.PI * 2 / count;
+      ctx.rotate(angle);
+      for (let i=0;i<count;i++) {
+        const start = -Math.PI/2 + i*arc;
+        ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,radius,start,start+arc); ctx.closePath();
+        ctx.fillStyle = colors[i % colors.length]; ctx.fill();
+        ctx.strokeStyle = 'rgba(255,248,233,.8)'; ctx.lineWidth = 3; ctx.stroke();
+        ctx.save(); ctx.rotate(start + arc/2); ctx.textAlign = 'right'; ctx.fillStyle = '#fffaf0';
+        ctx.font = `800 ${count > 22 ? 19 : 21}px "Microsoft JhengHei", sans-serif`;
+        const text = eligibleFoods[i].name;
+        const max = count > 22 ? 112 : 130;
+        const clipped = ctx.measureText(text).width > max ? text.slice(0,6) + '…' : text;
+        ctx.fillText(clipped, radius - 20, 7); ctx.restore();
+      }
+      ctx.beginPath(); ctx.arc(0,0,radius+5,0,Math.PI*2); ctx.strokeStyle='#203d3c'; ctx.lineWidth=10; ctx.stroke();
+      ctx.restore();
+    }
+
+    function easeOut(t) { return 1 - Math.pow(1-t, 4); }
+
+    function showResult(food) {
+      labelEl.textContent = '今天就吃這間';
+      nameEl.textContent = food.name;
+      dishEl.textContent = `推薦品項：${food.dish}｜分類：${food.category}`;
+      addressEl.innerHTML = '';
+      const prefix = document.createTextNode('地址：');
+      const link = document.createElement('a');
+      link.href = googleMapsUrl(food);
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = food.address;
+      link.title = '在 Google 地圖開啟';
+      addressEl.append(prefix, link);
+    }
+
+    function spin() {
+      if (spinning || !eligibleFoods.length) return;
+      spinning = true;
+      filterInputs.forEach(input => input.disabled = true);
+      button.disabled = true;
+      button.textContent = '轉盤轉動中…';
+      labelEl.textContent = '正在尋找今日午餐';
+      nameEl.textContent = '轉呀轉呀';
+      dishEl.textContent = '請稍候，命運正在挑選。';
+      addressEl.textContent = '';
+
+      const count = eligibleFoods.length;
+      const arc = Math.PI * 2 / count;
+      const chosen = Math.floor(Math.random()*count);
+      const targetCenter = -(chosen + .5) * arc;
+      const normalizedCurrent = ((rotation % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
+      const normalizedTarget = ((targetCenter % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
+      const delta = ((normalizedTarget - normalizedCurrent + Math.PI*2) % (Math.PI*2)) + Math.PI*2*7;
+      const start = rotation, end = rotation + delta, duration = 3800, began = performance.now();
+
+      function animate(now) {
+        const t = Math.min((now-began)/duration,1);
+        rotation = start+(end-start)*easeOut(t);
+        draw();
+        if (t < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          rotation = end;
+          spinning = false;
+          filterInputs.forEach(input => input.disabled = false);
+          button.disabled = false;
+          button.textContent = '再抽一次 ✦';
+          showResult(eligibleFoods[chosen]);
+        }
+      }
+      requestAnimationFrame(animate);
+    }
+
+    filterInputs.forEach(input => input.addEventListener('change', () => updateEligibleFoods(true)));
+    button.addEventListener('click', spin);
+    renderChoiceList();
+    updateEligibleFoods(false);
+    draw();
+  </script>
+</body>
+</html>
